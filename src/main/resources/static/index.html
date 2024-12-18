@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD</title>
+    <style>
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-group {
+            position: relative;
+            width: 180px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-header {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1 class="form-header">CRUD</h1>
+<div class="form-container">
+    <fieldset>
+        <legend>ID</legend>
+        <div class="form-group">
+            <label for="employerId">ID</label>
+            <input id="employerId" type="number">
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Личные данные</legend>
+        <div class="form-group">
+            <label for="employerLastName">Фамилия</label>
+            <input id="employerLastName" type="text">
+        </div>
+        <div class="form-group">
+            <label for="employerFirstName">Имя</label>
+            <input id="employerFirstName" type="text">
+        </div>
+        <div class="form-group">
+            <label for="employerSecondName">Отчество</label>
+            <input id="employerSecondName" type="text">
+        </div>
+        <div class="form-group">
+            <label for="employerPosition">Должность</label>
+            <input id="employerPosition" type="text">
+        </div>
+        <div class="form-group">
+            <label for="employerAge">Возраст</label>
+            <input id="employerAge" type="number">
+        </div>
+        <div class="form-group">
+            <label for="employerSalary">Зарпата</label>
+            <input id="employerSalary" type="number">
+        </div>
+    </fieldset>
+</div>
+<div class="form-container">
+    <button id="getAllEmployersButton">Получить список всех сотрудников</button>
+    <button id="addEmployerButton">Добавить сотрудника</button>
+    <button id="updateEmployerButton">Обновить информацию сотрудника</button>
+    <button id="deleteEmployerButton">Удалить сотрудника</button>
+</div>
+<div class="form-container">
+    <table id="employersTable">
+        <thead id="employersThread"></thead>
+    </table>
+</div>
+</body>
+
+<script>
+    const getAllButton = document.getElementById('getAllEmployersButton');
+    const addButton = document.getElementById('addEmployerButton');
+    const putButton = document.getElementById('updateEmployerButton');
+    const deleteButton = document.getElementById('deleteEmployerButton');
+
+    async function sendRequest(url, method, body = null) {
+
+        try {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            const response = await fetch(url, options);
+
+            if (!response.ok) throw new Error(`Error : ${response.body} Status: ${response.status}`);
+
+            return response;
+
+        } catch (error) {
+
+            console.error(error);
+            throw error;
+        }
+    }
+
+    function getFormData() {
+        const lastName = document.getElementById('employerLastName').value;
+        const firstName = document.getElementById('employerFirstName').value;
+        const secondName = document.getElementById('employerSecondName').value;
+        const position = document.getElementById('employerPosition').value;
+        const age = parseInt(document.getElementById('employerAge').value);
+        const salary = parseInt(document.getElementById('employerSalary').value);
+
+        return { firstName, secondName, lastName, age, position, salary };
+    }
+
+    getAllButton.addEventListener('click', async function () {
+        try {
+            const listEmployees = await ((await sendRequest('/api/employers', 'GET')).json());
+            const thread = document.getElementById("employersThread")
+            const tr = document.createElement('tr');
+
+            console.log(listEmployees);
+            const headers = ["ID", "Имя", "Фамилия", "Отчество", "Должность", "Возраст", "Зарплата"];
+            headers.forEach((header) => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                tr.appendChild(th);
+            });
+            thread.appendChild(tr);
+
+            listEmployees.forEach((employee) => {
+
+                const trEmployee = document.createElement('tr');
+
+                const values = [
+                    employee.id,
+                    employee.firstName,
+                    employee.lastName,
+                    employee.secondName,
+                    employee.position,
+                    employee.age,
+                    employee.salary
+                ];
+
+                values.forEach((value) => {
+                    const tdValue = document.createElement('td');
+                    tdValue.textContent = value;
+                    trEmployee.appendChild(tdValue);
+                })
+                thread.appendChild(trEmployee);
+            })
+            console.log('Список сотрудников:', listEmployees);
+        } catch (error) {
+            console.error('Ошибка при получении сотрудников', error.message);
+            alert('Ошибка при получении сотрудников')
+        }
+    });
+
+    addButton.addEventListener('click', async function () {
+        const employerData = getFormData();
+        try {
+            await sendRequest('/api/employers', 'POST', employerData);
+            alert('Сотрудник добавлкн');
+        } catch (error) {
+            console.error('Ошибка при добавлении сотрудника', error.message);
+            alert('Ошибка при добавлении сотрудника')
+        }
+    });
+
+    putButton.addEventListener('click', async function () {
+        const id = parseInt(document.getElementById('employerId').value);
+        if (isNaN(id)) {
+            alert('ID Не может быть пустым');
+            return;
+        }
+        const employerData = getFormData();
+        try {
+            await sendRequest(`/api/employers/${id}`, 'PUT', employerData);
+            alert('Информация о сотруднике обновлена');
+        } catch (error) {
+            console.error('Ошибка при обновлении сотрудника', error.message);
+            alert('Ошибка при обновлении сотрудника');
+        }
+    });
+
+    deleteButton.addEventListener('click', async function () {
+        const id = parseInt(document.getElementById('employerId').value);
+        if (isNaN(id)) {
+            alert('ID Не может быть пустым');
+            return;
+        }
+        try {
+            await sendRequest(`/api/employers/${id}`, 'DELETE');
+            alert('Сотрудник удален');
+
+        } catch (error) {
+            console.error('Ошибка при удалении сотрудника', error.message);
+            alert('Ошибка при удалении сотрудника')
+        }
+    });
+</script>
+</html>

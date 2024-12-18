@@ -2,7 +2,7 @@ package com.example.rest.controller;
 
 import com.example.rest.model.EmployersModel;
 import com.example.rest.service.EmployersService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Log4j2
 public class ApiController {
 
@@ -30,10 +30,9 @@ public class ApiController {
         return new ResponseEntity<>(employersService.findById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/employers")
+    @PostMapping(value = "/employers")
     public ResponseEntity<EmployersModel> addEmployer(@RequestBody EmployersModel employersModel) {
-
-        return new ResponseEntity<>(employersService.add(employersModel),HttpStatus.CREATED);
+        return new ResponseEntity<>(employersService.add(employersModel), HttpStatus.CREATED);
     }
 
     @PutMapping("/employers/{id}")

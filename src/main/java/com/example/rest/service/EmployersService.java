@@ -3,7 +3,7 @@ package com.example.rest.service;
 import com.example.rest.exception.EmployersNotFoundException;
 import com.example.rest.model.EmployersModel;
 import com.example.rest.repository.EmployersRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 @Service
 @Log4j2
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EmployersService implements BaseServiceInterface<EmployersModel> {
 
     private final EmployersRepository employersRepository;
@@ -30,6 +30,7 @@ public class EmployersService implements BaseServiceInterface<EmployersModel> {
         updateFieldIfNotNull(model::setAge, entity.getAge());
         updateFieldIfNotNull(model::setFirstName, entity.getFirstName());
         updateFieldIfNotNull(model::setLastName, entity.getLastName());
+        updateFieldIfNotNull(model::setSecondName, entity.getSecondName());
         updateFieldIfNotNull(model::setPosition, entity.getPosition());
         updateFieldIfNotNull(model::setSalary, entity.getSalary());
 
@@ -37,8 +38,15 @@ public class EmployersService implements BaseServiceInterface<EmployersModel> {
     }
 
     private <T> void updateFieldIfNotNull(Consumer<T> setter, T value) {
-        if (value != null) {
-            setter.accept(value);
+        if(value != null) {
+            if (value instanceof Integer) {
+                setter.accept(value);
+            }
+            else if (value instanceof String) {
+                if (!value.equals("")) {
+                    setter.accept(value);
+                }
+            }
         }
     }
 

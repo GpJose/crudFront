@@ -5,7 +5,7 @@ import com.example.rest.form.EmployersForm;
 import com.example.rest.model.EmployersModel;
 import com.example.rest.service.EmployersService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(path = "/employers")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class WebController {
 
     private final EmployersService employersService;
@@ -30,7 +30,7 @@ public class WebController {
             model.addAttribute("error", "No employers found.");
         }
 
-        return "employers"; // Возвращает имя шаблона для отображения
+        return "employers";
     }
 
     @GetMapping("/{id}")
@@ -44,7 +44,7 @@ public class WebController {
             model.addAttribute("error", "Employer not found.");
         }
 
-        return "employers"; // Возвращает имя шаблона для отображения
+        return "employers";
     }
 
     @PostMapping
