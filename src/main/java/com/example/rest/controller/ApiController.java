@@ -1,7 +1,10 @@
 package com.example.rest.controller;
 
 import com.example.rest.model.EmployersModel;
-import com.example.rest.service.EmployersService;
+import com.example.rest.model.enums.KafkaTopicsEnums;
+import com.example.rest.service.EmployersServiceImpl;
+import com.example.rest.service.interfaces.KafkaProducerInterface;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -15,35 +18,42 @@ import java.util.List;
 @RequiredArgsConstructor
 @Log4j2
 public class ApiController {
+    private final EmployersServiceImpl employersServiceImpl;
 
-    private final EmployersService employersService;
+    private final KafkaProducerInterface kafkaProducerInterface;
 
     @GetMapping("/employers")
     public ResponseEntity<List<EmployersModel>> getEmployers() {
 
-        return new ResponseEntity<>(employersService.getAll(), HttpStatus.OK);
+        return new ResponseEntity<>(employersServiceImpl.getAll(), HttpStatus.OK);
     }
 
     @GetMapping("/employers/{id}")
     public ResponseEntity<EmployersModel> getEmployerById(@PathVariable Long id) {
 
-        return new ResponseEntity<>(employersService.findById(id), HttpStatus.OK);
+        return new ResponseEntity<>(employersServiceImpl.findById(id), HttpStatus.OK);
     }
 
     @PostMapping(value = "/employers")
-    public ResponseEntity<EmployersModel> addEmployer(@RequestBody EmployersModel employersModel) {
-        return new ResponseEntity<>(employersService.add(employersModel), HttpStatus.CREATED);
+    public ResponseEntity<HttpStatus> addEmployer(@RequestBody EmployersModel employersModel) throws JsonProcessingException {
+            kafkaProducerInterface.sendMessage(employersModel, KafkaTopicsEnums.ADD.getTopic());
+
+            return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/employers/{id}")
-    public ResponseEntity<EmployersModel> updateEmployer(@PathVariable Long id, @RequestBody EmployersModel employersModel) {
-
-        return new ResponseEntity<>(employersService.replace(id, employersModel),HttpStatus.OK);
+    public ResponseEntity<HttpStatus> updateEmployer(@PathVariable Long id, @RequestBody EmployersModel employersModel) throws JsonProcessingException {
+        employersModel.setId(id);
+        kafkaProducerInterface.sendMessage(employersModel, KafkaTopicsEnums.UPDATE.getTopic());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/employers/{id}")
-    public ResponseEntity<Void>deleteEmployer(@PathVariable Long id) {
-        employersService.delete(id);
+    public ResponseEntity<HttpStatus>deleteEmployer(@PathVariable Long id) throws JsonProcessingException {
+        employersServiceImpl.delete(id);
+        kafkaProducerInterface.sendMessage(EmployersModel.builder()
+                        .id(id)
+                .build(), KafkaTopicsEnums.DELETE.getTopic());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

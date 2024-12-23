@@ -1,4 +1,4 @@
-package com.example.rest.service;
+package com.example.rest.service.interfaces;
 
 import com.example.rest.exception.EmployersNotFoundException;
 

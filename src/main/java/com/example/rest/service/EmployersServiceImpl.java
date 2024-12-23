@@ -3,6 +3,7 @@ package com.example.rest.service;
 import com.example.rest.exception.EmployersNotFoundException;
 import com.example.rest.model.EmployersModel;
 import com.example.rest.repository.EmployersRepository;
+import com.example.rest.service.interfaces.BaseServiceInterface;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import java.util.function.Consumer;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class EmployersService implements BaseServiceInterface<EmployersModel> {
+public class EmployersServiceImpl implements BaseServiceInterface<EmployersModel> {
 
     private final EmployersRepository employersRepository;
 

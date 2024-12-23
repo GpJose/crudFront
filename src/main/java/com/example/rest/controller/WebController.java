@@ -3,13 +3,13 @@ package com.example.rest.controller;
 import com.example.rest.exception.EmployersNotFoundException;
 import com.example.rest.form.EmployersForm;
 import com.example.rest.model.EmployersModel;
-import com.example.rest.service.EmployersService;
-import jakarta.validation.Valid;
+import com.example.rest.service.EmployersServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -17,13 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebController {
 
-    private final EmployersService employersService;
+    private final EmployersServiceImpl employersServiceImpl;
 
     @GetMapping
     public String getAllEmployers(Model model) {
 
         try {
-            List<EmployersModel> employers = employersService.getAll();
+            List<EmployersModel> employers = employersServiceImpl.getAll();
             model.addAttribute("employers", employers);
 
         } catch (EmployersNotFoundException e) {
@@ -37,7 +37,7 @@ public class WebController {
     public String getEmployerById(@PathVariable Long id, Model model) {
 
         try {
-            EmployersModel employer = employersService.findById(id);
+            EmployersModel employer = employersServiceImpl.findById(id);
             model.addAttribute("searchedEmployer", employer);
 
         } catch (EmployersNotFoundException e) {
@@ -56,7 +56,7 @@ public class WebController {
         employersModel.setAge(employersForm.getAge());
         employersModel.setPosition(employersForm.getPosition());
         employersModel.setSalary(employersForm.getSalary());
-        employersService.add(employersModel);
+        employersServiceImpl.add(employersModel);
 
         return "redirect:/employers";
     }
@@ -71,7 +71,7 @@ public class WebController {
             employersModel.setAge(employersForm.getAge());
             employersModel.setPosition(employersForm.getPosition());
             employersModel.setSalary(employersForm.getSalary());
-            employersService.replace(id, employersModel);
+            employersServiceImpl.replace(id, employersModel);
 
         } catch (EmployersNotFoundException e) {
             model.addAttribute("error", "Employer not found.");
@@ -84,7 +84,7 @@ public class WebController {
     public String deleteEmployer(@PathVariable Long id, Model model) {
 
         try {
-            employersService.delete(id);
+            employersServiceImpl.delete(id);
             model.addAttribute("message", "Employer deleted successfully.");
 
         } catch (EmployersNotFoundException e) {
