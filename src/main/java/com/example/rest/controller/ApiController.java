@@ -50,7 +50,6 @@ public class ApiController {
 
     @DeleteMapping("/employers/{id}")
     public ResponseEntity<HttpStatus>deleteEmployer(@PathVariable Long id) throws JsonProcessingException {
-        employersServiceImpl.delete(id);
         kafkaProducerInterface.sendMessage(EmployersModel.builder()
                         .id(id)
                 .build(), KafkaTopicsEnums.DELETE.getTopic());
